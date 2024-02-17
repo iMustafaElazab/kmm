@@ -38,7 +38,7 @@ val dataModule = module {
             }
         install(ResponseObserver) {
             onResponse { response ->
-                println("HTTP:status:=>${response.status.value}")
+                println("HTTP:status:=>${response.call.response}")
             }
         }
             install(HttpTimeout) {
@@ -55,9 +55,9 @@ val dataModule = module {
 
     single<HomeApi> { HomeApiImpl(httpClient = get()) }
     single<HomeRepository> { HomeRepositoryImpl(homeApi = get()) }
-    factory { GetAllProductsUseCase(homeRepository = get()) }
-    factory { GetAllCategoriesUseCase(homeRepository = get()) }
-    factory { GetAllBannersUseCase(homeRepository = get()) }
+    single { GetAllProductsUseCase(homeRepository = get()) }
+    single { GetAllCategoriesUseCase(homeRepository = get()) }
+    single { GetAllBannersUseCase(homeRepository = get()) }
 }
 
 @DefaultArgumentInterop.Enabled

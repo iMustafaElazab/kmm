@@ -24,106 +24,110 @@ class HomeViewModel (private val getAllBannersUseCase: GetAllBannersUseCase,
     val homeUiState get()  = _homeUiState.asStateFlow()
 
 
-    init {
-        getBanners()
-        getCategories()
-        getProducts()
-    }
 
-    private fun getBanners(){
+
+     fun getBanners() {
         viewModelScope.coroutineScope.launch {
-            _homeUiState.update { HomeUiState(isBannersLoading = true) }
+            _homeUiState.update {
+                it?.copy(isBannersLoading = true, bannersError = "") // Clear previous error
+            }
             try {
-                val result = getAllCategoriesUseCase.invoke()
+                val result = getAllBannersUseCase.invoke()
                 when (result) {
                     is Response.Error -> {
-                        _homeUiState.emit(
-                            HomeUiState(
-                                isCategoriesLoading = false,
-                                categoriesError = result.message ?: "Unknown error"
-                            )
-                        )
+                        _homeUiState.update {
+                            it?.copy(isBannersLoading = false, bannersError = result.message ?: "Unknown error")
+                        }
                     }
                     is Response.Success -> {
-                        result.data?.data?.data?.let { categories ->
-                            _homeUiState.emit(HomeUiState(isCategoriesLoading = false, categories = categories))
+                        result.data?.data?.let { banners ->
+                            _homeUiState.update {
+                                it?.copy(isBannersLoading = false, banners = banners)
+                            }
                         } ?: run {
-                            _homeUiState.emit(
-                                HomeUiState(
-                                    isCategoriesLoading = false,
-                                    categoriesError = "Data is null or empty"
-                                )
-                            )
+                            _homeUiState.update {
+                                it?.copy(isBannersLoading = false, bannersError = "Data is null or empty")
+                            }
                         }
                     }
                 }
             } catch (e: Exception) {
-                _homeUiState.emit(HomeUiState(isCategoriesLoading = false, categoriesError = "Unexpected error"))
+                _homeUiState.update {
+                    it?.copy(isBannersLoading = false, bannersError = "Unexpected error")
+                }
             }
         }
     }
     private fun getCategories() {
         viewModelScope.coroutineScope.launch {
-            _homeUiState.update { HomeUiState(isCategoriesLoading = true) }
+            _homeUiState.update {
+                it?.copy(isCategoriesLoading = true, categoriesError = "") // Clear previous error
+            }
             try {
-                val result = getAllBannersUseCase.invoke()
-                when (result) {
+                when (val result = getAllCategoriesUseCase.invoke()) {
                     is Response.Error -> {
-                        _homeUiState.emit(
-                            HomeUiState(
-                                isBannersLoading = false,
-                                bannersError = result.message ?: "Unknown error"
-                            )
-                        )
+                        _homeUiState.update {
+                            it?.copy(isCategoriesLoading = false, categoriesError = result.message ?: "Unknown error")
+                        }
                     }
                     is Response.Success -> {
-                        result.data?.data?.let { banners ->
-                            _homeUiState.emit(HomeUiState(isCategoriesLoading = false, banners = banners))
+                        result.data?.data?.data?.let { categories ->
+                            _homeUiState.update {
+                                it?.copy(isCategoriesLoading = false, categories = categories)
+                            }
                         } ?: run {
-                            _homeUiState.emit(
-                                HomeUiState(
-                                    isBannersLoading = false,
-                                    bannersError = "Data is null or empty"
-                                )
-                            )
+                            _homeUiState.update {
+                                it?.copy(isCategoriesLoading = false, categoriesError = "Data is null or empty")
+                            }
                         }
                     }
                 }
             } catch (e: Exception) {
-                _homeUiState.emit(HomeUiState(isBannersLoading = false, bannersError = "Unexpected error"))
+                _homeUiState.update {
+                    it?.copy(isCategoriesLoading = false, categoriesError = "Unexpected error")
+                }
             }
         }
     }
 
-    private fun getProducts(){
+    private fun getProducts() {
         viewModelScope.coroutineScope.launch {
-            _homeUiState.update { HomeUiState(isProductsLoading = true) }
+            _homeUiState.update {state->
+                state?.copy(
+                    isProductsLoading = true,
+                    productsError = "" // Clear previous error if any
+                )
+            }
             try {
                 val result = getAllProductsUseCase.invoke()
                 when (result) {
                     is Response.Error -> {
-                        _homeUiState.emit(
-                            HomeUiState(
+                        _homeUiState.update {state->
+                            state?.copy(
                                 isProductsLoading = false,
                                 productsError = result.message ?: "Unknown error"
                             )
-                        )
+                        }
                     }
                     is Response.Success -> {
-                        result.data?.data?.data?.let { products ->
-                            _homeUiState.emit(HomeUiState(isProductsLoading = false, products = products))
-                        } ?: run {
-                            _homeUiState.emit(
-                                HomeUiState(
+                        result.data?.data?.data.let { products ->
+                            _homeUiState.update {state->
+                                state?.copy(
                                     isProductsLoading = false,
-                                    productsError = "Data is null or empty"
+                                    products = products!!
                                 )
-                            )
+                            }
                         }
                     }
                 }
             } catch (e: Exception) {
-                _homeUiState.emit(HomeUiState(isProductsLoading = false, productsError = "Unexpected error"))
+                // Consider specific exception handling here
+                _homeUiState.update {state->
+                    state?.copy(
+                        isProductsLoading = false,
+                        productsError = "Unexpected error"
+                    )
+                }
             }
         }
     }

@@ -11,7 +11,6 @@ import utils.Response
 class HomeRepositoryImpl(private val homeApi: HomeApi) : HomeRepository {
 
     override suspend fun getAllProducts(): Response<ProductsDTO> {
-
         return when(val result = homeApi.getAllProducts()){
             is Response.Success -> {
                 Response.Success(data = result.data)

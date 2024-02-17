@@ -2,6 +2,7 @@ package mostafa.roqay.project
 
 import android.app.Application
 import di.initKoin
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import viewmodel.HomeViewModel
 
@@ -12,7 +13,7 @@ class BaseApplication : Application() {
         initKoin(
             listOf(
                 module {
-                    factory { HomeViewModel(get(),get(),get()) }
+                    viewModel<HomeViewModel>{ HomeViewModel(get(),get(),get()) }
                 }
             )
         )

@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import org.koin.androidx.compose.koinViewModel
@@ -25,5 +26,11 @@ class MainActivity : ComponentActivity() {
 fun Preview() {
     val viewModel: HomeViewModel = koinViewModel()
     val homeState by viewModel.homeUiState.collectAsState()
-   Text(text = "${homeState?.categories?.size}")
+
+    // Trigger data fetching explicitly
+    LaunchedEffect(Unit) {
+        viewModel.getBanners()
+    }
+
+    println("STATE:=>${homeState?.banners}")
 }
