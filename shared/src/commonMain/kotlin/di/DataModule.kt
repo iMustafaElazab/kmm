@@ -57,15 +57,12 @@ val dataModule = module {
     single<HomeRepository> { HomeRepositoryImpl(homeApi = get()) }
     single { GetAllProductsUseCase(homeRepository = get()) }
     single { GetAllCategoriesUseCase(homeRepository = get()) }
-    single { GetAllBannersUseCase(homeRepository = get()) }
+    single { GetAllBannersUseCase() }
 }
 
-@DefaultArgumentInterop.Enabled
-fun initKoin(modules: List<Module> = emptyList()) {
-    startKoin {
-        modules(
-            dataModule,
-            *modules.toTypedArray(),
-        )
-    }
-}
+private val sharedModules = listOf(
+    dataModule, getViewModelByPlatform()
+)
+
+fun getSharedModules() = sharedModules
+
